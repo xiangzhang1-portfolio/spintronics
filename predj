@@ -1,0 +1,56 @@
+#!/usr/bin/python 
+#In root folder with 11111111-------- format, get each folder's mag_list, compute energy-coefficient of various J's.
+#imports
+import os
+import numpy
+from subprocess import call
+import re
+#ignore me...
+print '============================================================================================================================================'
+print '\tEquation'
+print '============================================================================================================================================'
+#parameters
+matrices=[]
+indices=[]
+indices.append([[1,13],[2,14],[3,15],[4,16]])
+for i in range(0,len(indices)):
+ for j in range(0,len(indices[i])):
+  for k in range(0,len(indices[i][j])):
+   indices[i][j][k]=indices[i][j][k]-1
+values=[2,2,1,1,1,1]
+for i in range(0,5):
+ tmpmat=numpy.zeros((4,4))
+ for j in indices[i]:
+  tmpmat[tuple(j)]=values[i]
+ matrices.append(tmpmat)
+#iterate through subdirs
+A=[]
+b=[]
+x=[]
+for subdir in os.popen('ls').read().split():
+ if re.search('[a-zA-Z]',subdir):
+  continue
+ #get magnetic moments list
+ mag_list=' '.join(subdir)
+ #A_line=(product1,product2,...), set matrix mat first
+ A_line=[]
+ for i in range(0,5):
+  product_x=numpy.matrix(mag_list)
+  product_xT=product_x.getT() 
+  product=product_x*matrices[i]*product_xT
+  A_line.append(product.item(0))
+ A_line.append(1)
+ A.append(A_line)
+ b.append(0)
+#solve linear equation by least-squre
+solution,residuals,rank,singular=numpy.linalg.lstsq(A,b)
+for i in range(0,len(A)):
+ print '\t'+'\t\t'.join(str(round(x,3)) for x in A[i])+'\t|\t'+str(b[i]) 
+print '============================================================================================================================================'
+print '\tSolution'
+print '============================================================================================================================================'
+for i in range(0,len(solution)):
+ print '\t'+'J'+str(i)+'\t=\t'+"{:.4E}".format(solution[i])
+print '\tresiduals='+str(residuals)+'\trank='+str(rank)
+
+print numpy.linalg.matrix_rank(A)

@@ -1,0 +1,15 @@
+#!/bin/bash
+for i in La2 Sr2 Ba2
+do
+  cd $i
+  for j in `ls -d */`
+  do
+    cd $j
+    echo -n "$i$j "
+    eB=`cat POSCAR | sed -n '6p' | awk '{print $2}'`
+    eBprime=`cat POSCAR | sed -n '6p' | awk '{print $3}'`
+    echo -n $eB | ~/src/element2num
+    echo -n $eBprime | ~/src/element2num
+    echo -n `~/src/charge/spec_edi/gen generic spin notex splitdos`
+  done
+done
